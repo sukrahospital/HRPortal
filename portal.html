@@ -304,12 +304,12 @@ tr:last-child td{border-bottom:none}
 <script>
 
 // Load URL from localStorage (set via setup screen) or fallback to hardcoded
-let SCRIPT_URL = localStorage.getItem('sukra_script_url') || 'YOUR_APPS_SCRIPT_URL_HERE';
+let SCRIPT_URL = localStorage.getItem('sukra_script_url') || 'https://script.google.com/macros/s/AKfycbyPo63pJeDBVARm19GXNRflooI0Nj21bABrA4MwOshWGFAUnA6CBdUxWk_XC1InT5xP/exec';
 let user=null,balance=null,myLeaves=[],activePortal='',selShiftName='',rejectTarget=null,actionsDoneToday=0;
 
 // Show setup screen if URL not configured
 function checkSetup() {
-  if (!SCRIPT_URL || SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyPo63pJeDBVARm19GXNRflooI0Nj21bABrA4MwOshWGFAUnA6CBdUxWk_XC1InT5xP/exec') {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
     document.getElementById('setupScreen').style.display='flex';
     document.getElementById('hubPage').style.display='none';
     return false;
@@ -336,7 +336,7 @@ function resetScriptUrl() {
   }
 }
 async function api(action,params={}) {
-  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('YOUR_APPS_SCRIPT_URL_HERE')) {
     document.getElementById('setupScreen').style.display='flex';
     document.getElementById('hubPage').style.display='none';
     return {success:false, message:'Setup required'};
