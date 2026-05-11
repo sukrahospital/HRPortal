@@ -274,7 +274,7 @@ tr:last-child td{border-bottom:none}
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwrqJQyeo-zVxBxqenkSW3AQEXl9njqf7fArz1_WdgkEy1NyZLF8R1qif_WDIg4_MWt/exec';
 let user=null,balance=null,myLeaves=[],activePortal='',selShiftName='',rejectTarget=null,actionsDoneToday=0;
 async function api(action,params={}) {
-  if (!SCRIPT_URL || SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+  if (!SCRIPT_URL || SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbw-cpJmSMKa2ddotk9AxjDj2kzrC2kwum72FepbpJdGo25x837QWqVvAWuXaycxIJtm/exec') {
     return {success:false, message:'⚠️ Apps Script URL not set. Open portal.html, find YOUR_APPS_SCRIPT_URL_HERE and replace with your deployed Web App URL.'};
   }
   try {
