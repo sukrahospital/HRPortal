@@ -418,12 +418,7 @@ function checkSetup() {
   return true;
 }
 function saveScriptUrl() {
-  const url = document.getElementById('setup-url').value.trim();
-  if (!url || !url.startsWith('https://script.google.com')) {
-    document.getElementById('setup-err').textContent='Please paste a valid Apps Script URL (starts with https://script.google.com)';
-    document.getElementById('setup-err').style.display='block';
-    return;
-  }
+  const url = 'https://script.google.com/macros/s/AKfycbxLQKN40vFC5zZEK1dwsTknFbmgE0I0UlyT5CCLITdFeVuFQDza8aMhamSaf6MWTuPp/exec'
   localStorage.setItem('sukra_script_url', url);
   SCRIPT_URL = url;
   document.getElementById('setupScreen').style.display='none';
