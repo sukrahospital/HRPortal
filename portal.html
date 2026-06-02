@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-<title>Sukra Hospital — HR Portal</title>
+<title>Sukra Hospital — HR Portal v4.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -443,7 +443,7 @@ tr:hover td{background:#f8faff}
         </div>
         <div class="fr"><label>Reason for Change</label><textarea id="pf-sup-reason" placeholder="Why is the supervisor changing?" style="min-height:58px"></textarea></div>
         <div id="pf-sup-msg" style="display:none;padding:8px 11px;border-radius:8px;font-size:.76rem;margin-bottom:10px"></div>
-        <button class="sbtn" onclick="requestSupChange()">Submit Change Request &#x2192;</button>
+        <button class="sbtn" id="sup-change-btn">Submit Change Request &#x2192;</button>
       </div>
       <div class="card" style="max-width:340px">
         <div class="card-t">&#x1F510; Change My PIN</div>
@@ -540,7 +540,7 @@ tr:hover td{background:#f8faff}
 <div class="toast" id="toast"></div>
 
 <script>
-var URL='https://script.google.com/macros/s/AKfycbxUSnOOrt6F9ykKmYIO82WXA3652FC9mxz2K0fA3B1CDx9JoIg000F81fMrbOvHeYv8/exec';
+var URL='https://script.google.com/macros/s/AKfycbzV10H4br4VTPcsT9c9QZoFcYAjvM_jzqLYIqcegfp4DwTUtB-hJWOzJshHfdXVm2RSgA/exec';
 var user=null,bal=null,myLeaves=[],selShift='',rjTarget=null,schedOff=0,schedData=null;
 // ── API ──────────────────────────────────────────────────────
 async function api(action,params){
@@ -567,6 +567,14 @@ function showPop(html){document.getElementById('popBox').innerHTML=html;document
 function closeRj(){document.getElementById('rjBg').classList.remove('show');rjTarget=null;}
 function fmtD(d){if(!d)return '—';try{return new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});}catch(e){return d;}}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();closeRj();closeApprove();}});
+
+// Wire all profile buttons safely after DOM+JS loads
+document.addEventListener('DOMContentLoaded',function(){
+  var supBtn=document.getElementById('sup-change-btn');
+  if(supBtn) supBtn.addEventListener('click', function(){
+    requestSupChange();
+  });
+});
 
 // ── LOGIN ─────────────────────────────────────────────────────
 async function doLogin(){
@@ -1010,7 +1018,7 @@ async function adminResetPin(){
 }
 
 // ── SCHEDULE ──────────────────────────────────────────────────
-var SLBL={M:'Morning',G:'General',E:'Evening',N:'Night',OFF:'Off',LEAVE:'On Leave'};
+var SLBL={M:'Morning',G:'General',E:'Evening',N:'Night',OFF:'Off',LEAVE:'On Leave',L:'Leave',CL:'CL Leave',A:''};
 var SCODES=['M','G','E','N'];
 
 window.addEventListener('load',function(){renderSched();});
@@ -1052,9 +1060,8 @@ async function renderSched(){
 
   var depts=res.allDepts||[];
   var dm=res.deptMap||{};
-  var activeCols=SCODES.filter(function(sh){return depts.some(function(d){return dm[d]&&dm[d][sh]&&dm[d][sh].length;});});
-  var hasLeave=depts.some(function(d){return dm[d]&&dm[d].LEAVE&&dm[d].LEAVE.length;});
-  if(hasLeave) activeCols.push('LEAVE');
+  var ALL_SHIFTS=['M','G','E','N','L','CL','OFF'];
+  var activeCols=ALL_SHIFTS.filter(function(sh){return depts.some(function(d){return dm[d]&&dm[d][sh]&&dm[d][sh].length;});});
 
   if(!depts.length||res.rosterCount===0){
     document.getElementById('dept-tbl').innerHTML='<div class="no-roster"><div class="nr-icon">&#x1F4CB;</div><div style="font-size:.83rem">No roster data for '+dateStr.substring(0,7)+'.</div><div style="font-size:.68rem;opacity:.6;margin-top:6px">In Google Sheets, open <strong>ShiftRoster</strong> tab.<br>Set <strong>Month</strong> column to <em>'+dateStr.substring(0,7)+'</em> and enter shift codes (M/G/E/N/OFF) per employee per day.</div></div>';
@@ -1080,10 +1087,13 @@ async function renderSched(){
     activeCols.forEach(function(s){
       var ppl=(shifts[s]||[]);
       colTots[s]=(colTots[s]||0)+ppl.length;
+      var colors={M:'#fef3c7',G:'#e8eeff',E:'#f3e8ff',N:'#1a3fa0',OFF:'rgba(255,255,255,.06)',L:'rgba(233,30,140,.2)',CL:'#fef3c7',A:'transparent'};
+      var textColors={M:'#92400e',G:'#1a3fa0',E:'#6b21a8',N:'#c7d2fe',OFF:'rgba(255,255,255,.3)',L:'#f9a8d4',CL:'#92400e',A:'#aaa'};
       if(ppl.length){
         var idx2=cellData.length;
         cellData.push({dept:dept,sh:s,ppl:ppl});
-        tbl+='<td style="padding:7px 10px;text-align:center"><span class="np np'+s+'" onclick="showCellPopIdx('+idx2+')" style="cursor:pointer">'+ppl.length+'</span></td>';
+        var bg=colors[s]||'rgba(255,255,255,.1)', tc=textColors[s]||'#fff';
+        tbl+='<td style="padding:7px 10px;text-align:center"><span style="background:'+bg+';color:'+tc+';padding:2px 10px;border-radius:20px;font-weight:800;font-size:.78rem;cursor:pointer" onclick="showCellPopIdx('+idx2+')">'+ppl.length+'</span></td>';
       } else {
         tbl+='<td style="padding:7px 10px;text-align:center;color:rgba(255,255,255,.14);font-size:.68rem">—</td>';
       }
@@ -1151,6 +1161,14 @@ function schedShiftPop(sh){
 }
 
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){closePop();closeRj();closeApprove();}});
+
+// Wire all profile buttons safely after DOM+JS loads
+document.addEventListener('DOMContentLoaded',function(){
+  var supBtn=document.getElementById('sup-change-btn');
+  if(supBtn) supBtn.addEventListener('click', function(){
+    requestSupChange();
+  });
+});
 
 // ── PROFILE ───────────────────────────────────────────────────
 async function loadProfile(){
@@ -1239,7 +1257,36 @@ async function requestSupChange(){
 
 async function chgPin(){
   var cur=document.getElementById('cp-cur').value.trim();
-  var np=document.getElementById('cp-new').value.trim();
+  var np=document.getElementById('cp-new').value.tri
+// Explicit global exports - ensures onclick="fn()" always works
+window.requestSupChange = requestSupChange;
+window.saveProfile      = saveProfile;
+window.uploadPhoto      = uploadPhoto;
+window.doApprove        = doApprove;
+window.openRj           = openRj;
+window.confirmApprove   = confirmApprove;
+window.confirmRj        = confirmRj;
+window.closeApprove     = closeApprove;
+window.doLogin          = doLogin;
+window.doLogout         = doLogout;
+window.schedNav         = schedNav;
+window.showDeptPop      = showDeptPop;
+window.showCellPopIdx   = showCellPopIdx;
+window.schedShiftPop    = schedShiftPop;
+window.toggleEye        = toggleEye;
+window.closePop         = closePop;
+window.closeRj          = closeRj;
+window.adminResetPin    = adminResetPin;
+window.testConn         = testConn;
+window.filterHist       = filterHist;
+window.chgPin           = chgPin;
+window.loadAllLeaves    = loadAllLeaves;
+window.submitLeave      = submitLeave;
+window.submitCompOff    = submitCompOff;
+window.doCheckIn        = function(){if(selShift){api('checkIn',{empNo:user.empNo,shift:selShift}).then(function(r){toast(r.msg,r.ok?'ok':'err');document.getElementById('ci-msg').textContent=r.ok?'Attendance marked for '+selShift+' shift':r.msg;});}else{toast('Select a shift first.','err');}};
+window.selSh            = selSh;
+window.cancelLv         = cancelLv;
+m();
   var con=document.getElementById('cp-con').value.trim();
   if(!cur||!np||!con){toast('Fill all PIN fields.','err');return;}
   if(np.length!==4||!/^[0-9]{4}$/.test(np)){toast('New PIN must be exactly 4 digits.','err');return;}
